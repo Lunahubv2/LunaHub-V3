@@ -305,14 +305,14 @@ bruh9.MouseButton1Click:Connect(function()
 
     if validKey then
         wait()
+        gui:Destroy()   
         bruh3.Text = "[KeySystem] Valid Key!"
         
         -- Load the script from the URL
         loadstring(game:HttpGet("https://raw.githubusercontent.com/Lunahubv2/LunaHubV2/main/source.lua"))()
     
 
-        -- Destroy the GUI after loading the script
-        gui:Destroy()
+        
     else
         -- When the key is invalid
         bruh3.Text = "[KeySystem]🔑 Invalid Key!"
