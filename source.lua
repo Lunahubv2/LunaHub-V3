@@ -63,7 +63,7 @@ end
 local function loadKeyFromGist()
     local userId = fGetUserId()
     local success, response = pcall(function()
-        return HttpService:GetAsync("https://api.github.com/gists/Lunahubv2" .. GIST_ID, true, {
+        return HttpService:GetAsync("https://api.github.com/gists/" .. GIST_ID, true, {
             ["Authorization"] = "token " .. GITHUB_TOKEN
         })
     end)
@@ -181,7 +181,7 @@ local function saveKeyToGist(key)
 
     local success, response = pcall(function()
         return HttpService:RequestAsync({
-            Url = "https://api.github.com/Lunahubv2" .. GIST_ID,
+            Url = "https://api.github.com/gists/" .. GIST_ID,
             Method = "PATCH",
             Headers = {
                 ["Authorization"] = "token " .. GITHUB_TOKEN,
@@ -202,7 +202,7 @@ end
 local function loadKeyFromGist()
     local userId = fGetUserId()
     local success, response = pcall(function()
-        return HttpService:GetAsync("https://api.github.com/Lunahubv2" .. GIST_ID, true, {
+        return HttpService:GetAsync("https://api.github.com/gists/" .. GIST_ID, true, {
             ["Authorization"] = "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" .. GITHUB_TOKEN
         })
     end)
