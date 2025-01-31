@@ -11,8 +11,8 @@ local secret = "b613679a0814d9ec772f95d778c35fc5ff1697c493715653c6c712144292c5ad
 local useNonce = true -- use a nonce to prevent replay attacks and request tampering.
 
 --! GitHub configuration
-local GITHUB_TOKEN = "YOUR_GITHUB_TOKEN" -- Your GitHub token
-local GIST_ID = "YOUR_GIST_ID" -- Your Gist ID
+local GITHUB_TOKEN = "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" -- Your GitHub token
+local GIST_ID = "Lunahubv2" -- Your Gist ID
 
 --! callbacks
 local onMessage = function(message) end
@@ -49,7 +49,7 @@ local function saveKeyToGist(key)
 
     local success, response = pcall(function()
         return HttpService:RequestAsync({
-            Url = "https://api.github.com/gists/" .. GIST_ID,
+            Url = "https://api.github.com/Lunahubv2" .. GIST_ID,
             Method = "PATCH",
             Headers = {
                 ["Authorization"] = "token " .. GITHUB_TOKEN,
@@ -142,7 +142,7 @@ end
 cacheLink()
 
 -- Example usage of saving and loading keys
-local playerKey = "example_key" -- Replace this with the actual key you want to save
+local playerKey = "examp_key" -- Replace this with the actual key you want to save
 
 -- Save key when player leaves--! configuration
 local service = 362 -- your service id, this is used to identify your service.
@@ -150,7 +150,7 @@ local secret = "b613679a0814d9ec772f95d778c35fc5ff1697c493715653c6c712144292c5ad
 local useNonce = true -- use a nonce to prevent replay attacks and request tampering.
 
 --! GitHub configuration
-local GITHUB_TOKEN = "YOUR_GITHUB_TOKEN" -- Your GitHub token
+local GITHUB_TOKEN = "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" -- Your GitHub token
 local GIST_ID = "YOUR_GIST_ID" -- Your Gist ID
 
 --! callbacks
@@ -278,18 +278,6 @@ function cacheLink()
 end
 
 cacheLink()
-
--- GUI Setup
-local player = game.Players.LocalPlayer
-local playerGui = player:WaitForChild("PlayerGui")
-local screenGui = Instance.new("ScreenGui", playerGui)
-local textLabel = Instance.new("TextLabel", screenGui)
-
-textLabel.Size = UDim2.new(0.5, 0, 0.1, 0)
-textLabel.Position = UDim2.new(0.25, 0, 0.45, 0)
-textLabel.TextColor3 = Color3.new(1, 0, 0) -- Red text
-textLabel.BackgroundTransparency = 1 -- Transparent background
-textLabel.TextScaled = true
 
 -- Example usage of saving and loading keys
 local playerKey = "example_key" -- Replace this with the actual key you want to save
