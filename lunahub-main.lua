@@ -3,8 +3,14 @@ local service = 362  -- Your service ID
 local secret = "b613679a0814d9ec772f95d778c35fc5ff1697c493715653c6c712144292c5ad"  -- Your secret key for security
 local useNonce = true  -- Use a nonce to prevent replay attacks
 
+-- GitHub configuration
+local GITHUB_TOKEN = "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" -- Your GitHub token
+local GIST_ID = "Lunahubv2" -- Your Gist ID
+
+local HttpService = game:GetService("HttpService")
+
 -- Callbacks
-local onMessage = function(message) 
+local onMessage = function(message)
     print(message) -- Print messages to console for debugging
 end
 
@@ -13,36 +19,107 @@ repeat task.wait(1) until game:IsLoaded()
 
 -- Functions
 local requestSending = false
-local fRequest = request or http_request or syn_request
-local fOsTime = os.time
-local fMathRandom = math.random
-local fGetUserId = function() return game.Players.LocalPlayer.UserId end -- Changed from HWID to UserId
 local cachedLink, cachedTime = "", 0 -- Variables for caching
 
--- Pick host
-local host = "https://api.platoboost.com"
-local hostResponse = fRequest({
-    Url = host .. "/public/connectivity",
-    Method = "GET"
-})
-if hostResponse.StatusCode ~= 200 then
-    host = "https://api.platoboost.net"
+local function fGetUserId()
+    return tostring(game.Players.LocalPlayer.UserId) -- Make sure this runs in a LocalScript
 end
 
 -- Function to encode data to JSON
 local function lEncode(data)
-    return game:GetService("HttpService"):JSONEncode(data)
+    return HttpService:JSONEncode(data)
 end
 
 -- Function to decode JSON data
 local function lDecode(data)
-    return game:GetService("HttpService"):JSONDecode(data)
+    return HttpService:JSONDecode(data)
+end
+
+-- Function to delete existing key
+local function deleteExistingKey(userId)
+    local success, response = pcall(function()
+        return HttpService:RequestAsync({
+            Url = "https://api.github.com/gists/" .. GIST_ID,
+            Method = "GET",
+            Headers = {
+                ["Authorization"] = "token " .. GITHUB_TOKEN
+            }
+        })
+    end)
+
+    if success and response.StatusCode == 200 then
+        local gistData = lDecode(response.Body)
+        for _, file in pairs(gistData.files) do
+            if file.filename == userId .. "_keyBindings.json" then
+                gistData.files[file.filename] = nil -- Remove the file
+
+                -- Update the Gist without the deleted file
+                local body = lEncode(gistData)
+                local updateSuccess, updateResponse = pcall(function()
+                    return HttpService:RequestAsync({
+                        Url = "https://api.github.com/gists/" .. GIST_ID,
+                        Method = "PATCH",
+                        Headers = {
+                            ["Authorization"] = "token " .. GITHUB_TOKEN,
+                            ["Content-Type"] = "application/json"
+                        },
+                        Body = body
+                    })
+                end)
+
+                if not updateSuccess or updateResponse.StatusCode ~= 200 then
+                    warn("Failed to delete existing key: " .. (updateResponse and updateResponse.StatusCode or "Unknown error"))
+                else
+                    print("Existing key deleted successfully!")
+                end
+                return
+            end
+        end
+        print("No existing key found to delete.")
+    else
+        warn("Failed to fetch existing keys: " .. (response and response.StatusCode or "Unknown error"))
+    end
+end
+
+-- Function to save key to GitHub Gist using UserId
+local function saveKeyToGist(key)
+    local userId = fGetUserId()
+    
+    -- First, try to delete the existing key
+    deleteExistingKey(userId)
+
+    -- Now, save the new key
+    local body = lEncode({
+        files = {
+            [userId .. "_keyBindings.json"] = {
+                content = lEncode({ key = key })
+            }
+        }
+    })
+
+    local success, response = pcall(function()
+        return HttpService:RequestAsync({
+            Url = "https://api.github.com/gists/" .. GIST_ID,
+            Method = "PATCH",
+            Headers = {
+                ["Authorization"] = "token " .. GITHUB_TOKEN,
+                ["Content-Type"] = "application/json"
+            },
+            Body = body
+        })
+    end)
+
+    if success and response.StatusCode == 200 then
+        print("Key saved successfully!")
+    else
+        warn("Failed to save key: " .. (response and response.StatusCode or "Unknown error"))
+    end
 end
 
 -- Cache Link Function
-function cacheLink()
-    if (not cachedLink or cachedTime + (10 * 60) < fOsTime()) then
-        local response = fRequest({
+local function cacheLink()
+    if (not cachedLink or cachedTime + (10 * 60) < os.time()) then
+        local response = request({
             Url = host .. "/public/start",
             Method = "POST",
             Body = lEncode({
@@ -59,7 +136,7 @@ function cacheLink()
 
             if decoded.success then
                 cachedLink = decoded.data.url
-                cachedTime = fOsTime()
+                cachedTime = os.time()
                 return true, cachedLink
             else
                 onMessage(decoded.message)
@@ -83,19 +160,9 @@ end
 local function generateNonce()
     local str = ""
     for _ = 1, 16 do
-        str = str .. string.char(fMathRandom(97, 122)) -- Generate random lowercase letters
+        str = str .. string.char(math.random(97, 122)) -- Generate random lowercase letters
     end
     return str
-end
-
--- Copy link function
-local function copyLink()
-    local success, link = cacheLink()
-    
-    if success then
-        setclipboard(link)
-        onMessage("Link copied to clipboard: " .. link)
-    end
 end
 
 -- Redeem key function
@@ -109,7 +176,7 @@ local function redeemKey(key)
         nonce = useNonce and nonce or nil
     }
 
-    local response = fRequest({
+    local response = request({
         Url = endpoint,
         Method = "POST",
         Body = lEncode(body),
@@ -147,7 +214,7 @@ local function verifyKey(key)
         endpoint = endpoint .. "&nonce=" .. nonce
     end
 
-    local response = fRequest({
+    local response = request({
         Url = endpoint,
         Method = "GET"
     })
@@ -167,6 +234,14 @@ local function verifyKey(key)
         return false
     end
 end
+
+-- Example usage:
+local keyToSave = "WASD" -- Replace with actual key bindings you want to save
+saveKeyToGist(keyToSave)
+
+-- Note: Make sure you replace `request` with the correct function based on your environment 
+-- (e.g., `http_request`, `syn_request`, etc.) depending on the context of your Roblox game.
+
 
 -- GUI Setup
 local gui = Instance.new("ScreenGui")
