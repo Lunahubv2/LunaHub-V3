@@ -221,6 +221,6 @@ if autoLoadedKey then
     if isValid then
         loadstring(game:HttpGet("https://raw.githubusercontent.com/Lunahubv2/LunaHubV2/main/source.lua"))() -- Replace with your valid script URL
     else
-        loadAnotherScript("https://example.com/path/to/your/invalid/script.lua") -- Replace with your invalid script URL
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/Lunahubv2/LunaHub-V3/refs/heads/main/lunahub-main.lua"))() -- Replace with your invalid script URL
     end
 end
