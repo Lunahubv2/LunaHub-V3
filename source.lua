@@ -219,7 +219,7 @@ if autoLoadedKey then
     -- Verify the loaded key and load another script if valid
     local isValid = verifyKey(autoLoadedKey)
     if isValid then
-        loadAnotherScript("https://example.com/path/to/your/valid/script.lua") -- Replace with your valid script URL
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/Lunahubv2/LunaHubV2/main/source.lua"))() -- Replace with your valid script URL
     else
         loadAnotherScript("https://example.com/path/to/your/invalid/script.lua") -- Replace with your invalid script URL
     end
