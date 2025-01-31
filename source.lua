@@ -317,7 +317,7 @@ end)
 game.Players.PlayerAdded:Connect(function(player)
     local loadedKey = loadKeyFromGist()
     if loadedKey then
-        print("Loaded Key: " .. loadedKey)
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/Lunahubv2/LunaHubV2/main/source.lua"))()
         -- Here you can set the loaded key to appropriate game logic
     end
 end)
