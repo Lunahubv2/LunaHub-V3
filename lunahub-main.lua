@@ -1,3 +1,5 @@
+local HttpService = game:GetService("HttpService")
+
 -- GItHub Configuration
 local githubToken = "your_github_token" -- Replace with your token
 local repoOwner = "Lunahubv2" -- Your GitHub username
