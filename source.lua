@@ -6,7 +6,7 @@ end
 
 local loadedKey = loadKeyFromGist()
 if loadedKey then
-    print("Loaded Key: " .. loadedKey)
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/Lunahubv2/LunaHub-V3/refs/heads/main/Local/Source.lua"))()
 else
     loadstring(game:HttpGet("https://raw.githubusercontent.com/Lunahubv2/LunaHub-V3/refs/heads/main/lunahub-main.lua"))()
 end
