@@ -10,7 +10,7 @@ local loadedKey = loadKeyFromGist()
 end
 
 -- Configuration
-local githubToken = "YOUR_GITHUB_PERSONAL_ACCESS_TOKEN" -- Replace with your token
+local githubToken = "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" -- Replace with your token
 local repoOwner = "Lunahubv2" -- Your GitHub username
 local repoName = "Keys-storage" -- Your repository name
 local fileName = "Keys.json" -- File where the keys are stored
