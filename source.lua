@@ -11,9 +11,9 @@ end
 
 -- Configuration
 local githubToken = "YOUR_GITHUB_PERSONAL_ACCESS_TOKEN" -- Replace with your token
-local repoOwner = "YOUR_GITHUB_USERNAME" -- Your GitHub username
-local repoName = "key-storage" -- Your repository name
-local fileName = "keys.json" -- File where the keys are stored
+local repoOwner = "Lunahubv2" -- Your GitHub username
+local repoName = "Keys-storage" -- Your repository name
+local fileName = "Keys.json" -- File where the keys are stored
 
 local service = 362 -- Your service ID
 local secret = "b613679a0814d9ec772f95d778c35fc5ff1697c493715653c6c712144292c5ad" -- Obfuscate this for security
