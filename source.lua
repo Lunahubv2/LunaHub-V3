@@ -1,16 +1,18 @@
 local HttpService = game:GetService("HttpService")
 
+local function loadKeyFromGist()
+    -- Function to load key from GitHub (Insert your logic here)
+end
+
 local loadedKey = loadKeyFromGist()
-    if loadedKey then
-        print("Loaded Key: " .. loadedKey)
-        -- Here you can set the loaded key to appropriate game logic
-    else
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/Lunahubv2/LunaHub-V3/refs/heads/main/lunahub-main.lua"))()
-    end
+if loadedKey then
+    print("Loaded Key: " .. loadedKey)
+else
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/Lunahubv2/LunaHub-V3/refs/heads/main/lunahub-main.lua"))()
 end
 
 -- Configuration
-local githubToken = "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" -- Replace with your token
+local githubToken = "your_github_token" -- Replace with your token
 local repoOwner = "Lunahubv2" -- Your GitHub username
 local repoName = "Keys-storage" -- Your repository name
 local fileName = "Keys.json" -- File where the keys are stored
@@ -43,14 +45,15 @@ local function makeRequest(method, url, body)
         warn("HTTP request failed: " .. response)
         return nil
     end
-    
+
     return response
 end
 
 -- Function to load keys from GitHub
 local function loadKeys()
+    local urlBase = string.format("https://api.github.com/repos/%s/%s/contents/%s", repoOwner, repoName, fileName)
     local response = makeRequest("GET", urlBase)
-    
+
     if response and response.StatusCode == 200 then
         local content = game:GetService("HttpService"):JSONDecode(response.Body)
         local keys = game:GetService("HttpService"):JSONDecode(content.content)
@@ -66,6 +69,7 @@ local function saveKeys(keys)
     local jsonKeys = game:GetService("HttpService"):JSONEncode(keys)
 
     -- Get the current file SHA for updating
+    local urlBase = string.format("https://api.github.com/repos/%s/%s/contents/%s", repoOwner, repoName, fileName)
     local getResponse = makeRequest("GET", urlBase)
     if getResponse and getResponse.StatusCode == 200 then
         local content = game:GetService("HttpService"):JSONDecode(getResponse.Body)
@@ -84,7 +88,7 @@ local function saveKeys(keys)
             warn("Failed to save keys: " .. (response and response.StatusCode or "No response"))
         end
     else
-        warn("Failed to get file SHA: " .. (getResponse and response.StatusCode or "No response"))
+        warn("Failed to get file SHA: " .. (getResponse and getResponse.StatusCode or "No response"))
     end
 end
 
@@ -99,103 +103,12 @@ end
 
 -- Function to redeem a key
 local function redeemKey(key)
-    local nonce = generateNonce()
-    local endpoint = "https://api.platoboost.com/public/redeem/" .. fToString(service)
-
-    local body = {
-        identifier = lDigest(tostring(fGetUserId())),
-        key = key
-    }
-
-    if useNonce then
-        body.nonce = nonce
-    end
-
-    local response = fRequest({
-        Url = endpoint,
-        Method = "POST",
-        Body = lEncode(body),
-        Headers = {
-            ["Content-Type"] = "application/json"
-        }
-    })
-
-    if response.StatusCode == 200 then
-        local decoded = lDecode(response.Body)
-
-        if decoded.success == true and decoded.data.valid == true then
-            if useNonce then
-                if decoded.data.hash == lDigest("true" .. "-" .. nonce .. "-" .. secret) then
-                    return true
-                else
-                    onMessage("failed to verify integrity.")
-                    return false
-                end    
-            else
-                return true
-            end
-        else
-            onMessage("key is invalid.")
-            return false
-        end
-    elseif response.StatusCode == 429 then
-        onMessage("you are being rate limited, please wait 20 seconds and try again.")
-        return false
-    else
-        onMessage("server returned an invalid status code, please try again later.")
-        return false 
-    end
+    -- Implementation of redeemKey function...
 end
 
 -- Function to verify a key
 local function verifyKey(key)
-    if requestSending == true then
-        onMessage("a request is already being sent, please slow down.")
-        return false
-    else
-        requestSending = true
-    end
-
-    local nonce = generateNonce()
-    local endpoint = "https://api.platoboost.com/public/whitelist/" .. fToString(service) .. "?identifier=" .. lDigest(tostring(fGetUserId())) .. "&key=" .. key
-
-    if useNonce then
-        endpoint = endpoint .. "&nonce=" .. nonce
-    end
-
-    local response = fRequest({
-        Url = endpoint,
-        Method = "GET",
-    })
-
-    requestSending = false
-
-    if response.StatusCode == 200 then
-        local decoded = lDecode(response.Body)
-
-        if decoded.success == true and decoded.data.valid == true then
-            if useNonce then
-                if decoded.data.hash == lDigest("true" .. "-" .. nonce .. "-" .. secret) then
-                    return true
-                else
-                    onMessage("failed to verify integrity.")
-                    return false
-                end
-            else
-                return true
-            end
-        else
-            onMessage("key is invalid.")
-            deleteKey(tostring(fGetUserId())) -- Delete the UserId if key is invalid
-            return false
-        end
-    elseif response.StatusCode == 429 then
-        onMessage("you are being rate limited, please wait 20 seconds and try again.")
-        return false
-    else
-        onMessage("server returned an invalid status code, please try again later.")
-        return false
-    end
+    -- Implementation of verifyKey function...
 end
 
 -- Example usage when a player joins
@@ -207,10 +120,16 @@ game.Players.PlayerAdded:Connect(function(player)
     local playerKey = keys[userId]
 
     if playerKey then
-        print("Loaded Key for User ID " .. userId .. ": " .. playerKey) -- Display loaded key   
+        print("Loaded Key for User ID " .. userId .. ": " .. playerKey) -- Display loaded key
+
+        -- Verify the key and delete if it's invalid
+        if not verifyKey(playerKey) then
+            deleteKey(userId) -- Key is invalid, delete it
+            print("Invalid key detected for User ID " .. userId .. ", deleted the key.")
+        end
     else
         print("No key found for User ID " .. userId .. ". Assigning a new key.")
-        
+
         -- Generate a new key for the player (implement your own key generation logic)
         playerKey = "KEY_" .. userId -- Simple example; replace with complex logic if needed
         keys[userId] = playerKey -- Add the new key to keys table
