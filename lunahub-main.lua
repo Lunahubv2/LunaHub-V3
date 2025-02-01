@@ -1,3 +1,10 @@
+-- GItHub Configuration
+local githubToken = "your_github_token" -- Replace with your token
+local repoOwner = "Lunahubv2" -- Your GitHub username
+local repoName = "Keys-storage" -- Your repository name
+local fileName = "Keys.json" -- File where the keys are stored
+
+
 -- Platoboost configuration
 local service = 362  -- Your service ID
 local secret = "b613679a0814d9ec772f95d778c35fc5ff1697c493715653c6c712144292c5ad"  -- Your secret key for security
