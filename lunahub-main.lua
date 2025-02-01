@@ -263,7 +263,7 @@ bruh11.Parent = bruh9
 
 -- Event for Get Key Button
 bruh6.MouseButton1Click:Connect(function()
-    copyLink()
+    copyLink();
     bruh6.Text = "🔗   Link Copied!"
     wait(2)
     bruh6.Text = "🔗   Get Key"
