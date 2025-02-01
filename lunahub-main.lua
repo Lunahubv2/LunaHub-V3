@@ -269,8 +269,6 @@ bruh6.MouseButton1Click:Connect(function()
     bruh6.Text = "🔗   Get Key"
 end)
 
-
-
 bruh9.MouseButton1Click:Connect(function()
     local key = bruh3.Text -- Get the input key from the TextBox
     bruh9.Text = "🔑   Verifying!"
