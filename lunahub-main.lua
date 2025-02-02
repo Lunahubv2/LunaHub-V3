@@ -1,12 +1,4 @@
-local HttpService = game:GetService("HttpService")
-
--- GitHub Configuration
-local githubToken = "your_github_token" -- Replace with your GitHub token
-local repoOwner = "Lunahubv2" -- Your GitHub username
-local repoName = "Keys-storage" -- Your repository name
-local fileName = "Keys.json" -- File where the keys are stored
-
--- Platoboost Configuration
+-- Platoboost configuration
 local service = 362  -- Your service ID
 local secret = "b613679a0814d9ec772f95d778c35fc5ff1697c493715653c6c712144292c5ad"  -- Your secret key for security
 local useNonce = true  -- Use a nonce to prevent replay attacks
@@ -27,49 +19,84 @@ local fMathRandom = math.random
 local fGetUserId = function() return game.Players.LocalPlayer.UserId end -- Changed from HWID to UserId
 local cachedLink, cachedTime = "", 0 -- Variables for caching
 
--- GitHub Save Function
-local function saveKeysToGitHub(keys)
-    local url = "https://api.github.com/repos/" .. repoOwner .. "/" .. repoName .. "/contents/" .. fileName
-    local body = {
-        message = "Update keys",
-        content = HttpService:Base64Encode(HttpService:JSONEncode(keys)),
-        sha = nil -- This will be set later if the file exists
-    }
+-- Pick host
+local host = "https://api.platoboost.com"
+local hostResponse = fRequest({
+    Url = host .. "/public/connectivity",
+    Method = "GET"
+})
+if hostResponse.StatusCode ~= 200 then
+    host = "https://api.platoboost.net"
+end
 
-    -- Check if the file already exists to get the SHA
-    local getResponse = fRequest({
-        Url = url,
-        Method = "GET",
-        Headers = { 
-            ["Authorization"] = "token " .. githubToken,
-            ["Accept"] = "application/vnd.github.v3+json"
-        }
-    })
+-- Function to encode data to JSON
+local function lEncode(data)
+    return game:GetService("HttpService"):JSONEncode(data)
+end
 
-    if getResponse.StatusCode == 200 then
-        local fileData = HttpService:JSONDecode(getResponse.Body)
-        body.sha = fileData.sha -- Get the SHA of the existing file
-    end
+-- Function to decode JSON data
+local function lDecode(data)
+    return game:GetService("HttpService"):JSONDecode(data)
+end
 
-    -- Send the PUT request to save the keys
-    local putResponse = fRequest({
-        Url = url,
-        Method = "PUT",
-        Body = HttpService:JSONEncode(body),
-        Headers = { 
-            ["Authorization"] = "token " .. githubToken,
-            ["Content-Type"] = "application/json"
-        }
-    })
+-- Cache Link Function
+function cacheLink()
+    if (not cachedLink or cachedTime + (10 * 60) < fOsTime()) then
+        local response = fRequest({
+            Url = host .. "/public/start",
+            Method = "POST",
+            Body = lEncode({
+                service = service,
+                identifier = fGetUserId() -- Now using UserId
+            }),
+            Headers = {
+                ["Content-Type"] = "application/json"
+            }
+        })
 
-    if putResponse.StatusCode == 201 or putResponse.StatusCode == 200 then
-        onMessage("Keys saved to GitHub successfully!")
+        if response.StatusCode == 200 then
+            local decoded = lDecode(response.Body)
+
+            if decoded.success then
+                cachedLink = decoded.data.url
+                cachedTime = fOsTime()
+                return true, cachedLink
+            else
+                onMessage(decoded.message)
+                return false, decoded.message
+            end
+        elseif response.StatusCode == 429 then
+            local msg = "You are being rate limited, please wait 20 seconds and try again."
+            onMessage(msg)
+            return false, msg
+        end
+
+        local msg = "Failed to cache link."
+        onMessage(msg)
+        return false, msg
     else
-        onMessage("Failed to save keys to GitHub: " .. putResponse.StatusCode)
+        return true, cachedLink
     end
 end
 
--- Other existing functions...
+-- Nonce generation
+local function generateNonce()
+    local str = ""
+    for _ = 1, 16 do
+        str = str .. string.char(fMathRandom(97, 122)) -- Generate random lowercase letters
+    end
+    return str
+end
+
+-- Copy link function
+local function copyLink()
+    local success, link = cacheLink()
+    
+    if success then
+        setclipboard(link)
+        onMessage("Link copied to clipboard: " .. link)
+    end
+end
 
 -- Redeem key function
 local function redeemKey(key)
@@ -93,8 +120,6 @@ local function redeemKey(key)
         local decoded = lDecode(response.Body)
         if decoded.success and decoded.data.valid then
             onMessage("Key redeemed successfully!")
-            -- Save the key to GitHub after successful redemption
-            saveKeysToGitHub({key}) -- Assuming `keys` is a table of keys to save
             return true
         else
             onMessage("Invalid key.")
@@ -263,27 +288,28 @@ bruh11.Parent = bruh9
 
 -- Event for Get Key Button
 bruh6.MouseButton1Click:Connect(function()
-    copyLink();
+    copyLink()
     bruh6.Text = "🔗   Link Copied!"
     wait(2)
     bruh6.Text = "🔗   Get Key"
 end)
 
+
+
 bruh9.MouseButton1Click:Connect(function()
     local key = bruh3.Text -- Get the input key from the TextBox
-    bruh9.Text = "🔑   Verifying!"
-    wait(1)
-    
     local validKey = verifyKey(key) -- Verify the key
+          bruh9.Text = "🔑   Verifying!"
+          wait(1)
+          bruh9.Text = "🔑   Check Key"
 
     if validKey then
+        wait()
         bruh3.Text = "[KeySystem] Valid Key!"
-
-        -- Save the key to GitHub after successful verification
-        saveKeysToGitHub(key) -- Save the valid key to GitHub
-
+        
         -- Load the script from the URL
         loadstring(game:HttpGet("https://raw.githubusercontent.com/Lunahubv2/LunaHubV2/main/source.lua"))()
+    
 
         -- Destroy the GUI after loading the script
         gui:Destroy()
@@ -292,5 +318,5 @@ bruh9.MouseButton1Click:Connect(function()
         bruh3.Text = "[KeySystem]🔑 Invalid Key!"
         wait(1)
         bruh3.Text = "[KeySystem]🔑 Enter Key Here"
-    end
-end)
+     end
+ end)
